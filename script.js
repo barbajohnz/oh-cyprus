@@ -1,6 +1,9 @@
 const TOTAL_SEGMENTS = 4;
 let unlockedUpTo = parseInt(localStorage.getItem('oh-cyprus-progress') || '0');
 
+const bell = new Audio('audio/bell.mp3');
+const phoneRing = new Audio('audio/phone-ring.mp3');
+
 // === SCREEN NAVIGATION ===
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -24,7 +27,6 @@ const beginBtn = document.getElementById('begin-btn');
 const resumeNote = document.getElementById('resume-note');
 const restartBtn = document.getElementById('restart-btn');
 
-// Show resume message if they have saved progress
 if (unlockedUpTo > 0 && unlockedUpTo < TOTAL_SEGMENTS) {
   resumeNote.style.display = 'block';
 }
@@ -62,7 +64,6 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
   // Play / Pause
   playBtn.addEventListener('click', () => {
     if (audio.paused) {
-      // Stop any other playing audio
       for (let j = 1; j <= TOTAL_SEGMENTS; j++) {
         if (j !== i) {
           const other = document.getElementById(`audio-${j}`);
@@ -94,15 +95,17 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
     }
   });
 
-  // Segment ends — bell is baked into the audio file
+  // Segment ends — play chime then show continue button
   audio.addEventListener('ended', () => {
     playBtn.textContent = 'Play';
     progressBar.style.width = '100%';
     saveProgress(i);
-    // Small pause after bell fades, then show continue button
-    setTimeout(() => {
+    const chime = i === 3 ? phoneRing : bell;
+    chime.currentTime = 0;
+    chime.play();
+    chime.addEventListener('ended', () => {
       continueBtn.classList.remove('hidden');
-    }, 1500);
+    }, { once: true });
   });
 }
 
@@ -112,15 +115,6 @@ document.querySelectorAll('.continue-btn').forEach(btn => {
     showScreen(btn.dataset.next);
   });
 });
-
-// === DEV SKIP BUTTONS (remove before launch) ===
-for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
-  const nextTarget = i < TOTAL_SEGMENTS ? `${i + 1}` : 'end';
-  const continueBtn = document.querySelector(`.continue-btn[data-next="${nextTarget}"]`);
-  if (continueBtn) {
-    continueBtn.classList.remove('hidden');
-  }
-}
 
 // === INIT ===
 showScreen('welcome');
