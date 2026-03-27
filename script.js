@@ -126,5 +126,15 @@ document.querySelectorAll('.continue-btn').forEach(btn => {
   });
 });
 
+// === GLOBAL RESTART ===
+document.querySelectorAll('.global-restart-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    localStorage.removeItem('oh-cyprus-progress');
+    unlockedUpTo = 0;
+    document.querySelectorAll('.continue-btn').forEach(b => b.classList.add('hidden'));
+    showScreen('welcome');
+  });
+});
+
 // === INIT ===
 showScreen('welcome');
