@@ -4,6 +4,16 @@ let unlockedUpTo = parseInt(localStorage.getItem('oh-cyprus-progress') || '0');
 const bell = new Audio('audio/bell.mp3');
 const phoneRing = new Audio('audio/phone-ring.mp3');
 
+// Unlock audio on first user tap (required for iOS Safari)
+function unlockAudio() {
+  bell.play().then(() => bell.pause()).catch(() => {});
+  phoneRing.play().then(() => phoneRing.pause()).catch(() => {});
+  document.body.removeEventListener('touchstart', unlockAudio);
+  document.body.removeEventListener('click', unlockAudio);
+}
+document.body.addEventListener('touchstart', unlockAudio);
+document.body.addEventListener('click', unlockAudio);
+
 // === SCREEN NAVIGATION ===
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
