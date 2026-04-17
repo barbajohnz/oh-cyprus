@@ -53,6 +53,74 @@ body {
   pointer-events: none;
 }
 
+/* === INTRO SCREEN === */
+.paper--intro {
+  padding: 52px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.intro-svg-wrap {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+#intro-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* All paths start invisible — JS will animate them in */
+#intro-svg path {
+  opacity: 0;
+}
+
+.intro-skip {
+  margin-top: 28px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #b8a070;
+  font-style: italic;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.intro-skip:hover {
+  color: #8b6914;
+}
+
+/* === LOGO === */
+.logo-wrap {
+  margin-bottom: 6px;
+}
+
+.logo-wrap--small {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(180,140,80,0.2);
+}
+
+.logo-img {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.logo-img--small {
+  width: 100%;
+  max-width: 100%;
+  opacity: 0.75;
+}
+
 /* === TYPOGRAPHY === */
 h1 {
   font-family: 'Playfair Display', serif;
@@ -299,4 +367,7 @@ p {
   .paper { padding: 36px 26px; }
   h1 { font-size: 1.5rem; }
   .play-btn { padding: 14px 36px; }
+  .logo-img { max-width: 260px; }
+  .logo-img--small { max-width: 140px; }
+  .intro-svg-wrap { max-width: 300px; }
 }
