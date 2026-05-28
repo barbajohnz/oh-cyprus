@@ -36,10 +36,8 @@ function runIntroAnimation() {
   const svg = document.getElementById('intro-svg');
   const allPaths = Array.from(svg.querySelectorAll('path'));
 
-  // All paths are strokes in this SVG
   const strokePaths = allPaths;
 
-  // Set up stroke paths for drawing animation
   strokePaths.forEach(path => {
     const len = path.getTotalLength();
     path.style.strokeDasharray = len;
@@ -48,8 +46,6 @@ function runIntroAnimation() {
     path.style.transition = 'none';
   });
 
-  // Animate each stroke path sequentially with slight overlap
-  // MS_PER_PX controls drawing speed — lower is faster
   const MS_PER_PX = 5;
   const OVERLAP = 0.55;
   const INITIAL_PAUSE = 500;
@@ -68,7 +64,6 @@ function runIntroAnimation() {
     cumulativeDelay += duration * OVERLAP;
   });
 
-  // After everything finishes, pause then transition to welcome
   const totalAnimationTime = cumulativeDelay + 800;
 
   setTimeout(() => {
@@ -166,7 +161,16 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
     }
   });
 
-  // Segment ends — play chime then show continue button
+  // Segment 1 — show continue button when bell hits at 3:26
+  if (i === 1) {
+    audio.addEventListener('timeupdate', () => {
+      if (audio.currentTime >= 206) {
+        continueBtn.classList.remove('hidden');
+      }
+    });
+  }
+
+  // Segment ends
   audio.addEventListener('ended', () => {
     playBtn.textContent = 'Play';
     progressBar.style.width = '100%';

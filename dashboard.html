@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Love Letters to Cyprus | Operator Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a1a; color: #f0e6d3; font-family: 'Georgia', serif; padding: 2rem; }
+    h1 { font-size: 1.2rem; letter-spacing: 0.1em; margin-bottom: 2rem; opacity: 0.6; }
+    .groups { display: flex; flex-direction: column; gap: 1.5rem; }
+    .group { background: #2a2a2a; border-radius: 8px; padding: 1.5rem; }
+    .group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .group-title { font-size: 1.1rem; }
+    .segment-indicator { font-size: 0.85rem; opacity: 0.6; }
+    .progress-bar { background: #3a3a3a; border-radius: 4px; height: 6px; margin-bottom: 1rem; }
+    .progress-fill { background: #c9a96e; height: 6px; border-radius: 4px; transition: width 1s linear; }
+    .group-status { font-size: 0.8rem; opacity: 0.5; }
+    .controls { display: flex; gap: 1rem; margin-top: 2rem; }
+    button { background: #c9a96e; color: #1a1a1a; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-family: 'Georgia', serif; font-size: 0.9rem; cursor: pointer; }
+    button:hover { background: #b8934a; }
+    button.secondary { background: transparent; color: #c9a96e; border: 1px solid #c9a96e; }
+    .no-groups { opacity: 0.4; font-size: 0.9rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>LOVE LETTERS TO CYPRUS / OPERATOR</h1>
+  <div class="controls">
+    <button onclick="startNewGroup()">Start New Group</button>
+    <button class="secondary" onclick="resetAll()">Reset All</button>
+  </div>
+  <div class="groups" id="groups">
+    <p class="no-groups">No active groups. Start a group to begin.</p>
+  </div>
+
+  <script>
+    const SEGMENTS = ['Origins', 'The Restaurant Years', 'The Puppet & The Shadow', 'The Phone Call'];
+    const SEGMENT_DURATIONS = [390, 480, 720, 210]; // seconds
+    let groups = [];
+
+    function startNewGroup() {
+      const id = Date.now();
+      const group = { id, segment: 0, startTime: Date.now(), people: 1 };
+      groups.push(group);
+      renderGroups();
+    }
+
+    function resetAll() {
+      groups = [];
+      renderGroups();
+    }
+
+    function renderGroups() {
+      const container = document.getElementById('groups');
+      if (groups.length === 0) {
+        container.innerHTML = '<p class="no-groups">No active groups. Start a group to begin.</p>';
+        return;
+      }
+      container.innerHTML = groups.map((g, i) => {
+        const elapsed = Math.floor((Date.now() - g.startTime) / 1000);
+        const duration = SEGMENT_DURATIONS[g.segment];
+        const progress = Math.min((elapsed / duration) * 100, 100);
+        const remaining = Math.max(duration - elapsed, 0);
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        return `
+          <div class="group">
+            <div class="group-header">
+              <span class="group-title">Group ${i + 1}</span>
+              <span class="segment-indicator">${SEGMENTS[g.segment]}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+            <div class="group-status">${mins}m ${secs}s remaining in segment</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    setInterval(renderGroups, 1000);
+  </script>
+</body>
+</html>
