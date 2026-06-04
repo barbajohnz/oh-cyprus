@@ -1,2 +1,4 @@
 node_modules/
 *.wav
+*.DS_Store
+LLtC_from_alaida.mp3
