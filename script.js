@@ -29,12 +29,10 @@ const SEG1_CUES = [
 ];
 
 const bell = new Audio('audio/bell.mp3');
-const phoneRing = new Audio('audio/phone-ring.mp3');
 
 // Unlock audio on first user tap (required for iOS Safari)
 function unlockAudio() {
   bell.play().then(() => bell.pause()).catch(() => {});
-  phoneRing.play().then(() => phoneRing.pause()).catch(() => {});
   document.body.removeEventListener('touchstart', unlockAudio);
   document.body.removeEventListener('click', unlockAudio);
 }
