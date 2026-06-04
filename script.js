@@ -1,6 +1,33 @@
 const TOTAL_SEGMENTS = 4;
 let unlockedUpTo = parseInt(localStorage.getItem('oh-cyprus-progress') || '0');
 
+// === PI LIGHTING SERVER ===
+const PI = 'http://192.168.0.197:5000';
+
+function sendCue(bulb, opts = {}) {
+  const body = Object.assign({ bulb: bulb, on: true }, opts);
+  fetch(`${PI}/cue`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).catch(err => console.log('cue failed', bulb, err));
+}
+
+// === SEGMENT 1 LIGHTING CUES ===
+const SEG1_CUES = [
+  { time: 0,   bulb: 'desk',    brightness: 100, color: 'WarmWhite', fade: 10 },
+  { time: 75,  bulb: 'desk',    brightness: 40,  fade: 3 },
+  { time: 78,  bulb: 'desk',    brightness: 80,  fade: 2 },
+  { time: 88,  bulb: 'sensory', brightness: 65,  color: 'OrangeRed' },
+  { time: 121, bulb: 'sensory', brightness: 85,  fade: 2 },
+  { time: 140, bulb: 'desk',    brightness: 60,  fade: 4 },
+  { time: 140, bulb: 'sensory', brightness: 60,  fade: 4 },
+  { time: 180, bulb: 'desk',    brightness: 30,  fade: 2 },
+  { time: 182, bulb: 'desk',    brightness: 70,  fade: 2 },
+  { time: 206, bulb: 'desk',    brightness: 20,  fade: 3 },
+  { time: 206, bulb: 'sensory', brightness: 20,  fade: 3 },
+];
+
 const bell = new Audio('audio/bell.mp3');
 const phoneRing = new Audio('audio/phone-ring.mp3');
 
@@ -150,6 +177,7 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
   // Restart
   restartABtn.addEventListener('click', () => {
     audio.currentTime = 0;
+    if (i === 1) firedCues.clear();
     audio.play();
     playBtn.textContent = 'Pause';
   });
@@ -161,10 +189,28 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
     }
   });
 
-  // Segment 1 — show continue button when bell hits at 3:26
+  // Segment 1 — lighting cues + bell baked in at 3:26
   if (i === 1) {
     audio.addEventListener('timeupdate', () => {
-      if (audio.currentTime >= 206) {
+      const t = audio.currentTime;
+      SEG1_CUES.forEach((cue, idx) => {
+        if (!firedCues.has(idx) && t >= cue.time) {
+          firedCues.add(idx);
+          const { bulb, ...opts } = cue;
+          delete opts.time;
+          sendCue(bulb, opts);
+        }
+      });
+      if (t >= 206) {
+        continueBtn.classList.remove('hidden');
+      }
+    });
+  }
+
+  // Segment 3 — phone ring baked in at 4:07
+  if (i === 3) {
+    audio.addEventListener('timeupdate', () => {
+      if (audio.currentTime >= 247) {
         continueBtn.classList.remove('hidden');
       }
     });
@@ -175,14 +221,12 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
     playBtn.textContent = 'Play';
     progressBar.style.width = '100%';
     saveProgress(i);
-    const chime = i === 3 ? phoneRing : bell;
-    chime.currentTime = 0;
-    chime.play();
-    chime.addEventListener('ended', () => {
-      continueBtn.classList.remove('hidden');
-    }, { once: true });
+    continueBtn.classList.remove('hidden');
   });
 }
+
+// Tracks which Segment 1 cues have already fired so each runs once
+const firedCues = new Set();
 
 // === CONTINUE BUTTONS ===
 document.querySelectorAll('.continue-btn').forEach(btn => {
@@ -196,6 +240,7 @@ document.querySelectorAll('.global-restart-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     localStorage.removeItem('oh-cyprus-progress');
     unlockedUpTo = 0;
+    firedCues.clear();
     document.querySelectorAll('.continue-btn').forEach(b => b.classList.add('hidden'));
     showScreen('welcome');
   });
