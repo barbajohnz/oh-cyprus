@@ -2,7 +2,7 @@ const TOTAL_SEGMENTS = 4;
 let unlockedUpTo = parseInt(localStorage.getItem('oh-cyprus-progress') || '0');
 
 // === PI LIGHTING SERVER ===
-const PI = 'http://192.168.0.197:5000';
+const PI = 'http://192.168.0.196:5000';
 
 function sendCue(bulb, opts = {}) {
   const body = Object.assign({ bulb: bulb, on: true }, opts);
@@ -13,19 +13,17 @@ function sendCue(bulb, opts = {}) {
   }).catch(err => console.log('cue failed', bulb, err));
 }
 
-// === SEGMENT 1 LIGHTING CUES ===
+// === SEGMENT 1 LIGHTING CUES (single bulb) ===
 const SEG1_CUES = [
-  { time: 0,   bulb: 'desk',    brightness: 100, color: 'WarmWhite', fade: 10 },
-  { time: 75,  bulb: 'desk',    brightness: 40,  fade: 3 },
-  { time: 78,  bulb: 'desk',    brightness: 80,  fade: 2 },
-  { time: 88,  bulb: 'sensory', brightness: 65,  color: 'OrangeRed' },
-  { time: 121, bulb: 'sensory', brightness: 85,  fade: 2 },
-  { time: 140, bulb: 'desk',    brightness: 60,  fade: 4 },
-  { time: 140, bulb: 'sensory', brightness: 60,  fade: 4 },
-  { time: 180, bulb: 'desk',    brightness: 30,  fade: 2 },
-  { time: 182, bulb: 'desk',    brightness: 70,  fade: 2 },
-  { time: 206, bulb: 'desk',    brightness: 20,  fade: 3 },
-  { time: 206, bulb: 'sensory', brightness: 20,  fade: 3 },
+  { time: 0,   bulb: 'desk', brightness: 100, color: 'WarmWhite', fade: 10 },
+  { time: 75,  bulb: 'desk', brightness: 20,  color: 'WarmWhite', fade: 3 },
+  { time: 78,  bulb: 'desk', brightness: 80,  color: 'WarmWhite', fade: 2 },
+  { time: 88,  bulb: 'desk', brightness: 50,  hue: 30, saturation: 100 },
+  { time: 121, bulb: 'desk', brightness: 100, hue: 30, saturation: 100, fade: 2 },
+  { time: 140, bulb: 'desk', brightness: 60,  color: 'WarmWhite', fade: 4 },
+  { time: 180, bulb: 'desk', brightness: 30,  color: 'WarmWhite', fade: 2 },
+  { time: 182, bulb: 'desk', brightness: 70,  color: 'WarmWhite', fade: 2 },
+  { time: 206, bulb: 'desk', brightness: 5,   color: 'WarmWhite', fade: 3 },
 ];
 
 const bell = new Audio('audio/bell.mp3');
@@ -189,6 +187,15 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
 
   // Segment 1 — lighting cues + bell baked in at 3:26
   if (i === 1) {
+    // Start the room dark when beginning from the top.
+    // Sensory bulb is forced off until its 1:28 cue. The desk
+    // opening cue (time 0) already ramps up from black.
+  audio.addEventListener('play', () => {
+      if (audio.currentTime < 1) {
+        sendCue('desk', { on: false });
+        firedCues.clear();
+      }
+    });
     audio.addEventListener('timeupdate', () => {
       const t = audio.currentTime;
       SEG1_CUES.forEach((cue, idx) => {
