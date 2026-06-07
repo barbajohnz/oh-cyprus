@@ -187,10 +187,7 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
 
   // Segment 1 — lighting cues + bell baked in at 3:26
   if (i === 1) {
-    // Start the room dark when beginning from the top.
-    // Sensory bulb is forced off until its 1:28 cue. The desk
-    // opening cue (time 0) already ramps up from black.
-  audio.addEventListener('play', () => {
+    audio.addEventListener('play', () => {
       if (audio.currentTime < 1) {
         sendCue('desk', { on: false });
         firedCues.clear();
@@ -212,10 +209,28 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
     });
   }
 
+  // Segment 2 — church bell baked in at 5:22
+  if (i === 2) {
+    audio.addEventListener('timeupdate', () => {
+      if (audio.currentTime >= 322) {
+        continueBtn.classList.remove('hidden');
+      }
+    });
+  }
+
   // Segment 3 — phone ring baked in at 4:07
   if (i === 3) {
     audio.addEventListener('timeupdate', () => {
       if (audio.currentTime >= 247) {
+        continueBtn.classList.remove('hidden');
+      }
+    });
+  }
+
+  // Segment 4 — wind chimes baked in at 1:16
+  if (i === 4) {
+    audio.addEventListener('timeupdate', () => {
+      if (audio.currentTime >= 76) {
         continueBtn.classList.remove('hidden');
       }
     });
