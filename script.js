@@ -26,17 +26,6 @@ const SEG1_CUES = [
   { time: 206, bulb: 'desk', brightness: 5,   color: 'WarmWhite', fade: 3 },
 ];
 
-const bell = new Audio('audio/bell.mp3');
-
-// Unlock audio on first user tap (required for iOS Safari)
-function unlockAudio() {
-  bell.play().then(() => bell.pause()).catch(() => {});
-  document.body.removeEventListener('touchstart', unlockAudio);
-  document.body.removeEventListener('click', unlockAudio);
-}
-document.body.addEventListener('touchstart', unlockAudio);
-document.body.addEventListener('click', unlockAudio);
-
 // === SCREEN NAVIGATION ===
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
