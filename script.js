@@ -18,7 +18,7 @@ const SEG1_CUES = [
   { time: 0,   bulb: 'desk', brightness: 100, color: 'WarmWhite', fade: 10 },
   { time: 75,  bulb: 'desk', brightness: 20,  color: 'WarmWhite', fade: 3 },
   { time: 78,  bulb: 'desk', brightness: 80,  color: 'WarmWhite', fade: 2 },
-  { time: 88,  bulb: 'desk', brightness: 50,  hue: 30, saturation: 100 },
+  { time: 88,  bulb: 'desk', brightness: 100,  hue: 30, saturation: 100 },
   { time: 121, bulb: 'desk', brightness: 100, hue: 30, saturation: 100, fade: 2 },
   { time: 140, bulb: 'desk', brightness: 60,  color: 'WarmWhite', fade: 4 },
   { time: 180, bulb: 'desk', brightness: 30,  color: 'WarmWhite', fade: 2 },
@@ -247,6 +247,12 @@ document.querySelectorAll('.continue-btn').forEach(btn => {
 // === GLOBAL RESTART ===
 document.querySelectorAll('.global-restart-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    for (let j = 1; j <= TOTAL_SEGMENTS; j++) {
+      const a = document.getElementById(`audio-${j}`);
+      if (a && !a.paused) { a.pause(); a.currentTime = 0; }
+      const pb = document.querySelector(`.play-btn[data-segment="${j}"]`);
+      if (pb) pb.textContent = 'Play';
+    }
     localStorage.removeItem('oh-cyprus-progress');
     unlockedUpTo = 0;
     firedCues.clear();
