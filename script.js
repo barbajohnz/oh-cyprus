@@ -134,7 +134,6 @@ restartBtn.addEventListener('click', () => {
 for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
   const audio       = document.getElementById(`audio-${i}`);
   const playBtn     = document.querySelector(`.play-btn[data-segment="${i}"]`);
-  const restartABtn = document.querySelector(`.restart-btn[data-segment="${i}"]`);
   const progressBar = document.getElementById(`progress-${i}`);
   const nextTarget  = i < TOTAL_SEGMENTS ? `${i + 1}` : 'end';
   const continueBtn = document.querySelector(`.continue-btn[data-next="${nextTarget}"]`);
@@ -157,14 +156,6 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
       audio.pause();
       playBtn.textContent = 'Play';
     }
-  });
-
-  // Restart
-  restartABtn.addEventListener('click', () => {
-    audio.currentTime = 0;
-    if (i === 1) firedCues.clear();
-    audio.play();
-    playBtn.textContent = 'Pause';
   });
 
   // Progress bar
