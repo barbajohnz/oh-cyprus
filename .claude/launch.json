@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["/Users/barbajohnz/Documents/GitHub/oh-cyprus/serve_preview.py"],
+      "port": 8000
+    }
+  ]
+}

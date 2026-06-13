@@ -15,16 +15,53 @@ function sendCue(bulb, opts = {}) {
 
 // === SEGMENT 1 LIGHTING CUES (single bulb) ===
 const SEG1_CUES = [
-  { time: 0,   bulb: 'desk', brightness: 100, color: 'WarmWhite', fade: 10 },
-  { time: 75,  bulb: 'desk', brightness: 20,  color: 'WarmWhite', fade: 3 },
-  { time: 78,  bulb: 'desk', brightness: 80,  color: 'WarmWhite', fade: 2 },
-  { time: 88,  bulb: 'desk', brightness: 100,  hue: 30, saturation: 100 },
-  { time: 121, bulb: 'desk', brightness: 100, hue: 30, saturation: 100, fade: 2 },
-  { time: 140, bulb: 'desk', brightness: 60,  color: 'WarmWhite', fade: 4 },
-  { time: 180, bulb: 'desk', brightness: 30,  color: 'WarmWhite', fade: 2 },
-  { time: 182, bulb: 'desk', brightness: 70,  color: 'WarmWhite', fade: 2 },
-  { time: 206, bulb: 'desk', brightness: 5,   color: 'WarmWhite', fade: 3 },
+  { time: 0,   bulb: 'desk', brightness: 100, color: 'WarmWhite', fade: 9 },
+  { time: 75,  bulb: 'desk', brightness: 100, hue: 30, saturation: 100 },
+  { time: 100, bulb: 'desk', brightness: 50,  hue: 30, saturation: 100 },
+  { time: 120, bulb: 'desk', brightness: 50,  color: 'WarmWhite' },
+  { time: 160, bulb: 'desk', brightness: 1,   color: 'WarmWhite', fade: 4 },
 ];
+
+// === SEGMENT 2 LIGHTING CUES (single bulb) ===
+// Pink is hue 330. If it looks too magenta, lower toward 320; toward 345 is rosier.
+const SEG2_CUES = [
+  { time: 5,   bulb: 'seg2', brightness: 50,  color: 'WarmWhite', fade: 5 },
+  { time: 41,  bulb: 'seg2', brightness: 100, color: 'WarmWhite', fade: 3 },
+  { time: 65,  bulb: 'seg2', flicker: 'onoff', duration: 14, brightness: 100, color: 'WarmWhite' },
+  { time: 90,  bulb: 'seg2', brightness: 100, hue: 330, saturation: 100 },
+  { time: 100, bulb: 'seg2', brightness: 100, color: 'WarmWhite' },
+  { time: 131, bulb: 'seg2', flicker: 'onoff', duration: 22, brightness: 50, color: 'WarmWhite' },
+  { time: 156, bulb: 'seg2', brightness: 50,  color: 'WarmWhite' },
+  { time: 165, bulb: 'seg2', brightness: 100, hue: 330, saturation: 100 },
+  { time: 177, bulb: 'seg2', brightness: 50,  color: 'WarmWhite' },
+  { time: 185, bulb: 'seg2', brightness: 5,   color: 'WarmWhite', fade: 3 },
+  { time: 225, bulb: 'seg2', brightness: 50,  hue: 330, saturation: 100 },
+  { time: 300, bulb: 'seg2', flicker: 'color', duration: 13, brightness: 100 },
+  { time: 315, bulb: 'seg2', brightness: 50,  color: 'WarmWhite' },
+  { time: 322, bulb: 'seg2', brightness: 1,   color: 'WarmWhite', fade: 3 },
+];
+
+// === SEGMENT 3 LIGHTING CUES (single bulb) ===
+// Purple is hue 270. Red is hue 0.
+const SEG3_CUES = [
+  { time: 0,   bulb: 'seg3', brightness: 100, color: 'WarmWhite', fade: 5 },
+  { time: 15,  bulb: 'seg3', flicker: 'onoff', duration: 10, brightness: 100, hue: 270, saturation: 100 },
+  { time: 25,  bulb: 'seg3', on: false },
+  { time: 57,  bulb: 'seg3', brightness: 1,   color: 'WarmWhite' },
+  { time: 80,  bulb: 'seg3', brightness: 25,  color: 'WarmWhite' },
+  { time: 118, bulb: 'seg3', brightness: 5,   color: 'WarmWhite' },
+  { time: 151, bulb: 'seg3', brightness: 100, hue: 0, saturation: 100 },
+  { time: 216, bulb: 'seg3', brightness: 100, color: 'WarmWhite' },
+  { time: 247, bulb: 'seg3', brightness: 1,   color: 'WarmWhite', fade: 4 },
+];
+
+// === SEGMENT CONFIG ===
+const SEGMENT_CUES  = { 1: SEG1_CUES, 2: SEG2_CUES, 3: SEG3_CUES };
+const SEGMENT_BULB  = { 1: 'desk', 2: 'seg2', 3: 'seg3' };
+const CONTINUE_TIME = { 1: 160, 2: 322, 3: 247, 4: 76 };
+
+// Tracks which cues have fired so each runs once. Keys are namespaced per segment.
+const firedCues = new Set();
 
 // === SCREEN NAVIGATION ===
 function showScreen(id) {
@@ -138,6 +175,10 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
   const nextTarget  = i < TOTAL_SEGMENTS ? `${i + 1}` : 'end';
   const continueBtn = document.querySelector(`.continue-btn[data-next="${nextTarget}"]`);
 
+  const cues       = SEGMENT_CUES[i];
+  const bulb       = SEGMENT_BULB[i];
+  const continueAt = CONTINUE_TIME[i];
+
   // Play / Pause
   playBtn.addEventListener('click', () => {
     if (audio.paused) {
@@ -158,63 +199,37 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
     }
   });
 
-  // Progress bar
-  audio.addEventListener('timeupdate', () => {
-    if (audio.duration) {
-      progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
-    }
-  });
-
-  // Segment 1 — lighting cues + bell baked in at 3:26
-  if (i === 1) {
+  // Starting a segment from the top resets its bulb to off and clears its fired cues
+  if (cues && bulb) {
     audio.addEventListener('play', () => {
       if (audio.currentTime < 1) {
-        sendCue('desk', { on: false });
-        firedCues.clear();
+        sendCue(bulb, { on: false });
+        cues.forEach((c, idx) => firedCues.delete(`${i}-${idx}`));
       }
     });
-    audio.addEventListener('timeupdate', () => {
-      const t = audio.currentTime;
-      SEG1_CUES.forEach((cue, idx) => {
-        if (!firedCues.has(idx) && t >= cue.time) {
-          firedCues.add(idx);
-          const { bulb, ...opts } = cue;
+  }
+
+  // Progress bar + lighting cues + continue reveal
+  audio.addEventListener('timeupdate', () => {
+    const t = audio.currentTime;
+    if (audio.duration) {
+      progressBar.style.width = `${(t / audio.duration) * 100}%`;
+    }
+    if (cues) {
+      cues.forEach((cue, idx) => {
+        const key = `${i}-${idx}`;
+        if (!firedCues.has(key) && t >= cue.time) {
+          firedCues.add(key);
+          const { bulb: cueBulb, ...opts } = cue;
           delete opts.time;
-          sendCue(bulb, opts);
+          sendCue(cueBulb, opts);
         }
       });
-      if (t >= 206) {
-        continueBtn.classList.remove('hidden');
-      }
-    });
-  }
-
-  // Segment 2 — church bell baked in at 5:22
-  if (i === 2) {
-    audio.addEventListener('timeupdate', () => {
-      if (audio.currentTime >= 322) {
-        continueBtn.classList.remove('hidden');
-      }
-    });
-  }
-
-  // Segment 3 — phone ring baked in at 4:07
-  if (i === 3) {
-    audio.addEventListener('timeupdate', () => {
-      if (audio.currentTime >= 247) {
-        continueBtn.classList.remove('hidden');
-      }
-    });
-  }
-
-  // Segment 4 — wind chimes baked in at 1:16
-  if (i === 4) {
-    audio.addEventListener('timeupdate', () => {
-      if (audio.currentTime >= 76) {
-        continueBtn.classList.remove('hidden');
-      }
-    });
-  }
+    }
+    if (continueAt != null && t >= continueAt) {
+      continueBtn.classList.remove('hidden');
+    }
+  });
 
   // Segment ends
   audio.addEventListener('ended', () => {
@@ -225,13 +240,15 @@ for (let i = 1; i <= TOTAL_SEGMENTS; i++) {
   });
 }
 
-// Tracks which Segment 1 cues have already fired so each runs once
-const firedCues = new Set();
-
 // === CONTINUE BUTTONS ===
 document.querySelectorAll('.continue-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    showScreen(btn.dataset.next);
+    const next = btn.dataset.next;
+    // Turn off the bulb of the segment being left, for the next visitor
+    if (next === '2')   sendCue('desk', { on: false });  // leaving Segment 1
+    if (next === '3')   sendCue('seg2', { on: false });  // leaving Segment 2
+    if (next === '4')   sendCue('seg3', { on: false });  // leaving Segment 3
+    showScreen(next);
   });
 });
 
@@ -244,6 +261,9 @@ document.querySelectorAll('.global-restart-btn').forEach(btn => {
       const pb = document.querySelector(`.play-btn[data-segment="${j}"]`);
       if (pb) pb.textContent = 'Play';
     }
+    sendCue('desk', { on: false });
+    sendCue('seg2', { on: false });
+    sendCue('seg3', { on: false });
     localStorage.removeItem('oh-cyprus-progress');
     unlockedUpTo = 0;
     firedCues.clear();
