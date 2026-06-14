@@ -55,9 +55,18 @@ const SEG3_CUES = [
   { time: 247, bulb: 'seg3', brightness: 1,   color: 'WarmWhite', fade: 4 },
 ];
 
+// === SEGMENT 4 LIGHTING CUES (single bulb) ===
+const SEG4_CUES = [
+  { time: 0,   bulb: 'seg4', brightness: 25,  color: 'WarmWhite', fade: 2 },
+  { time: 16,  bulb: 'seg4', brightness: 50,  color: 'WarmWhite' },
+  { time: 19,  bulb: 'seg4', brightness: 100, color: 'WarmWhite' },
+  { time: 75,  bulb: 'seg4', brightness: 10,  color: 'WarmWhite' },
+  { time: 80,  bulb: 'seg4', brightness: 1,   color: 'WarmWhite', fade: 3 },
+];
+
 // === SEGMENT CONFIG ===
-const SEGMENT_CUES  = { 1: SEG1_CUES, 2: SEG2_CUES, 3: SEG3_CUES };
-const SEGMENT_BULB  = { 1: 'desk', 2: 'seg2', 3: 'seg3' };
+const SEGMENT_CUES  = { 1: SEG1_CUES, 2: SEG2_CUES, 3: SEG3_CUES, 4: SEG4_CUES };
+const SEGMENT_BULB  = { 1: 'desk', 2: 'seg2', 3: 'seg3', 4: 'seg4' };
 const CONTINUE_TIME = { 1: 160, 2: 322, 3: 247, 4: 76 };
 
 // Tracks which cues have fired so each runs once. Keys are namespaced per segment.
@@ -248,6 +257,7 @@ document.querySelectorAll('.continue-btn').forEach(btn => {
     if (next === '2')   sendCue('desk', { on: false });  // leaving Segment 1
     if (next === '3')   sendCue('seg2', { on: false });  // leaving Segment 2
     if (next === '4')   sendCue('seg3', { on: false });  // leaving Segment 3
+    if (next === 'end') sendCue('seg4', { on: false });  // leaving Segment 4
     showScreen(next);
   });
 });
@@ -264,6 +274,7 @@ document.querySelectorAll('.global-restart-btn').forEach(btn => {
     sendCue('desk', { on: false });
     sendCue('seg2', { on: false });
     sendCue('seg3', { on: false });
+    sendCue('seg4', { on: false });
     localStorage.removeItem('oh-cyprus-progress');
     unlockedUpTo = 0;
     firedCues.clear();
