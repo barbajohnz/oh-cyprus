@@ -90,6 +90,10 @@ function saveProgress(segment) {
 }
 
 // === INTRO ANIMATION ===
+let introTimeout = null;
+let introDone = false;
+let hasBegun = false;
+
 function runIntroAnimation() {
   const svg = document.getElementById('intro-svg');
   const allPaths = Array.from(svg.querySelectorAll('path'));
@@ -124,19 +128,25 @@ function runIntroAnimation() {
 
   const totalAnimationTime = cumulativeDelay + 800;
 
-  setTimeout(() => {
+  introTimeout = setTimeout(() => {
     transitionFromIntro();
   }, totalAnimationTime);
 }
 
 function transitionFromIntro() {
+  // Run only once — skip and the auto-finish timeout both call this,
+  // and a stale timeout firing later must not yank the user back to welcome.
+  if (introDone) return;
+  introDone = true;
+  if (introTimeout) { clearTimeout(introTimeout); introTimeout = null; }
+
   const introScreen = document.getElementById('screen-intro');
   introScreen.style.transition = 'opacity 0.9s ease';
   introScreen.style.opacity = '0';
   setTimeout(() => {
     introScreen.style.transition = '';
     introScreen.style.opacity = '';
-    showScreen('welcome');
+    if (!hasBegun) showScreen('welcome');
   }, 900);
 }
 
@@ -160,6 +170,7 @@ headphoneCheckbox.addEventListener('change', () => {
 });
 
 beginBtn.addEventListener('click', () => {
+  hasBegun = true;
   if (unlockedUpTo >= TOTAL_SEGMENTS) {
     showScreen('end');
   } else if (unlockedUpTo > 0) {
