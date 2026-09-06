@@ -1,0 +1,17 @@
+[Unit]
+Description=Love Letters to Cyprus lighting server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=barbajohnz
+WorkingDirectory=/home/barbajohnz/oh-cyprus/pi
+Environment="TAPO_EMAIL=your_tapo_email"
+Environment="TAPO_PASSWORD=your_tapo_password"
+ExecStart=/usr/bin/python3 /home/barbajohnz/oh-cyprus/pi/server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
